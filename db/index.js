@@ -1,40 +1,75 @@
-const fileDB = require('./file');
 const recordUtils = require('./record');
 const vaultEvents = require('../events');
+const { getCollection } = require('./mongo');
+const { createBackup } = require('../backup');
 
-function addRecord({ name, value }) {
+async function addRecord({ name, value }) {
   recordUtils.validateRecord({ name, value });
-  const data = fileDB.readDB();
-  const newRecord = { id: recordUtils.generateId(), name, value };
-  data.push(newRecord);
-  fileDB.writeDB(data);
+
+  const collection = await getCollection();
+  const newRecord = {
+    id: recordUtils.generateId(),
+    name,
+    value,
+    createdAt: new Date()
+  };
+
+  await collection.insertOne(newRecord);
+
   vaultEvents.emit('recordAdded', newRecord);
+  await createBackup();
   return newRecord;
 }
 
-function listRecords() {
-  return fileDB.readDB();
+async function listRecords() {
+  const collection = await getCollection();
+  const records = await collection.find({}).toArray();
+  return records;
 }
 
-function updateRecord(id, newName, newValue) {
-  const data = fileDB.readDB();
-  const record = data.find(r => r.id === id);
-  if (!record) return null;
-  record.name = newName;
-  record.value = newValue;
-  fileDB.writeDB(data);
-  vaultEvents.emit('recordUpdated', record);
-  return record;
+async function updateRecord(id, newName, newValue) {
+  const collection = await getCollection();
+
+  const result = await collection.findOneAndUpdate(
+    { id: Number(id) },
+    {
+      $set: {
+        name: newName,
+        value: newValue,
+        updatedAt: new Date()
+      }
+    },
+    { returnDocument: 'after' }
+  );
+
+  const updatedRecord = result.value;
+  if (!updatedRecord) return null;
+
+  vaultEvents.emit('recordUpdated', updatedRecord);
+  return updatedRecord;
 }
 
-function deleteRecord(id) {
-  let data = fileDB.readDB();
-  const record = data.find(r => r.id === id);
-  if (!record) return null;
-  data = data.filter(r => r.id !== id);
-  fileDB.writeDB(data);
-  vaultEvents.emit('recordDeleted', record);
-  return record;
+async function deleteRecord(id) {
+  const collection = await getCollection();
+  const result = await collection.findOneAndDelete({ id: Number(id) });
+  const deletedRecord = result.value;
+  if (!deletedRecord) return null;
+
+  vaultEvents.emit('recordDeleted', deletedRecord);
+  await createBackup();
+  return deletedRecord;
 }
 
-module.exports = { addRecord, listRecords, updateRecord, deleteRecord };
+async function clearAllRecords() {
+  const collection = await getCollection();
+  await collection.deleteMany({});
+}
+
+module.exports = {
+  addRecord,
+  listRecords,
+  updateRecord,
+  deleteRecord,
+  clearAllRecords
+};
+

@@ -1,0 +1,13 @@
+{
+  "name": "scdproject25",
+  "version": "1.0.0",
+  "description": "NodeVault CLI with MongoDB-backed CRUD, search, sort, export, backups, and statistics.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "mongodb": "^6.21.0"
+  }
+}
