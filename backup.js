@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const db = require('./db');
 
 async function createBackup() {
   try {
+    // Lazy load to avoid circular dependency
+    const db = require('./db');
     const records = await db.listRecords();
 
     const backupsDir = path.join(__dirname, 'backups');
@@ -33,5 +34,6 @@ async function createBackup() {
 module.exports = {
   createBackup
 };
+
 
 

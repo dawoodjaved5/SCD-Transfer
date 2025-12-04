@@ -256,7 +256,7 @@ async function menu() {
       default:
         console.log('Invalid option.');
     }
-  }
+    }
 }
 
 menu().catch(err => {

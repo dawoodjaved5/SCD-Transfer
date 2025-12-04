@@ -1,0 +1,8 @@
+NodeVault Export
+Exported At: 2025-12-04T05:09:13.306Z
+Total Records: 2
+File Name: export.txt
+--------------------------
+
+1. ID: 1764824720031 | Name: dawood | Value: 1 | Created: 2025-12-04
+2. ID: 1764824942551 | Name: dawood2 | Value: 2 | Created: 2025-12-04
