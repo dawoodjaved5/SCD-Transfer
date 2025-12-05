@@ -13,7 +13,14 @@ async function getDb() {
 
   if (!client) {
     client = new MongoClient(uri);
-    await client.connect();
+    try {
+      await client.connect();
+    } catch (error) {
+      console.error('\n❌ Failed to connect to MongoDB:', error.message);
+      console.error('💡 Make sure MongoDB is running. Start it with:');
+      console.error('   docker run -d --name mongo-local -p 27017:27017 mongo:latest\n');
+      throw error;
+    }
   }
 
   db = client.db(dbName);
