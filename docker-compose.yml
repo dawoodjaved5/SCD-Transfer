@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Database Service
+  mongodb:
+    image: mongo:latest
+    container_name: mongo-compose
+    volumes:
+      - mongo-data-compose:/data/db
+    networks:
+      - compose-network
+    restart: always
+
+  # Application Service
+  backend:
+    build: .   #for part 6 i used     image dawoodjaved5/scd-project-v2:latest
+    container_name: app-compose
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/nodevault
+    networks:
+      - compose-network
+    depends_on:
+      - mongodb
+    stdin_open: true # Equivalent to -i
+    tty: true        # Equivalent to -t
+    restart: always
+
+# Define Volumes
+volumes:
+  mongo-data-compose:
+
+# Define Networks
+networks:
+  compose-network:
+    driver: bridge
